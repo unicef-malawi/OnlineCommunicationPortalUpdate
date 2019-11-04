@@ -3,7 +3,7 @@
 # Olivier Demars - olivier@odc.services
 # for UNICEF Malawi
 #
-# February 2019
+# October 2019
 
 # Standard libraries
 import os
@@ -13,6 +13,7 @@ import pickle
 import os.path
 import logging
 import base64
+import datetime
 
 # Libraries to be installed with pip
 import requests
@@ -160,7 +161,7 @@ def main():
 
             # There is a ArcGIS Online 99 points limitation
             if object_id_counter < 100 and len(row) == 13:
-
+                print(row)
                 # Get informaton from Google Sheet
                 app_id, post_id, published_date, post_url, title, content \
                     = row[0], row[1], row[2], row[3], row[4], row[5]
@@ -180,12 +181,22 @@ def main():
                     # OBJECT ID
                     attribute_dict = {'__OBJECTID': object_id_counter}
 
+                    # Date
+                    year = int(published_date[0:4])
+                    month =  int(published_date[5:7])
+                    day = int(published_date[8:10])
+
+                    short_date = datetime.datetime(year, month, day)
+
+                    short_date_formated = short_date.strftime('%d %b: ').lstrip('0')
+
                     # Name
                     if source != 'Tchop':
-                        attribute_dict["name"] = '<a href=\'%s\' style='' target=\'”_blank”\'>%s</a>'\
+                        attribute_dict["name"] = short_date_formated +\
+                                                 '<a href=\'%s\' style='' target=\'”_blank”\'>%s</a>'\
                                                  % (post_url, title)
                     else:
-                        attribute_dict["name"] = title
+                        attribute_dict["name"] = short_date_formated + title
 
                     # Description
                     attribute_dict["description"] = content
@@ -238,15 +249,15 @@ def main():
         dict_map = get_data(MAP_DATA_URL, get_token())
         dict_map["operationalLayers"][0]["featureCollection"]["layers"][0]["featureSet"]["features"] = feature_list
 
-        update_data(MAP_UPDATE_URL, get_token(), json.dumps(dict_map))
-
+        response = update_data(MAP_UPDATE_URL, get_token(), json.dumps(dict_map))
+        print(response)
         # Update Story Map
         logging.info('Updating storymap')
         dict_storymap = get_data(STORYMAP_DATA_URL, get_token())
         dict_storymap["values"]["order"] = order_list
 
-        update_data(STORYMAP_UPDATE_URL, get_token(), json.dumps(dict_storymap))
-
+        response = update_data(STORYMAP_UPDATE_URL, get_token(), json.dumps(dict_storymap))
+        print(response)
     logging.info('###   End of Process')
 
 
