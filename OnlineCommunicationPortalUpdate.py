@@ -161,7 +161,7 @@ def main():
 
             # There is a ArcGIS Online 99 points limitation
             if object_id_counter < 100 and len(row) == 13:
-                print(row)
+
                 # Get informaton from Google Sheet
                 app_id, post_id, published_date, post_url, title, content \
                     = row[0], row[1], row[2], row[3], row[4], row[5]
